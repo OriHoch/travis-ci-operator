@@ -47,9 +47,8 @@ elif [ "${1}" == "github-update" ]; then
     pushd $TEMPDIR
     eval "${UPDATE_SCRIPT}"
     echo Committing and pushing to GitHub repo ${GIT_REPO} branch ${GIT_BRANCH}
-    git commit -m "${COMMIT_MSG}" &&\
-    git push ${GIT_REPO} ${GIT_BRANCH}
-    [ "$?" != "0" ] && echo failed to push change to GitHub && exit 1
+    git commit -m "${COMMIT_MSG}" && ! git push ${GIT_REPO} ${GIT_BRANCH} \
+        && echo failed to push change to GitHub && exit 1
     popd
     rm -rf $TEMPDIR
     echo GitHub update completed successfully
