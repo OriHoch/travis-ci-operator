@@ -45,19 +45,50 @@ docker run -v /etc/travis-ci-operator:/etc/travis-ci-operator -it uumpa/travis-c
     add-deploy-key travis_token github_user/repo branch_name deploy_key_name
 ```
 
-## Generate travis.yml file
+## Generate .travis.yml file
 
-Outputs a simple .travis.yml file with a minimal setup supporting travis-ci-operator
+Outputs an example .travis.yml file
 
 ```
 docker run -v /etc/travis-ci-operator:/etc/travis-ci-operator -it uumpa/travis-ci-operator \
     get-travis-yml github_user/repo branch_name
 ```
 
-## Helper scripts
+## Using the operator from .travis.yml
 
-Once travis-ci-operator is setup for your repo you can source the travis-ci-operator functions from your .travis.yml to authenticate with the supported services
+### Login to Docker
+
+If you authenticated with Docker in the previous step you can use the following to login to Docker:
 
 ```
-wget -qO - https://
+sudo: required
+services:
+- docker
+install:
+- travis_ci_operator.sh docker-login
+```
+
+You can then run docker build / push in the script or deploy steps
+
+```
+script:
+- docker build -t my-docker-user/my-project . && docker push my-docker-user/my-project
+```
+
+### Pushing changes to GitHub repos
+
+The following command will add file `foo` to the main (self) repo's master branch with commit message "testing github self update":
+
+```
+script:
+- travis_ci_operator.sh github-update self master "echo foo > bar; git add bar" "testing github self update"
+```
+
+The following command will add file `foo` to the repo configured with deploy key name `github-yaml-updater` at master branch with the given commit message
+
+The last argument is the repo slug of the other repo to update:
+
+```
+script:
+- travis_ci_operator.sh github-update github-yaml-updater master "echo foo > bar; git add bar" "testing travis-ci-operator" OriHoch/github-yaml-updater
 ```

@@ -64,19 +64,19 @@ init() {
         ! SSH_DEPLOY_KEY_OPENSSL_CMD=$(travis encrypt-file --repo "${GITHUB_REPO_SLUG}" \
                                                            --token ${TRAVIS_TOKEN} \
                                                            "${GITHUB_DEPLOY_KEY_FILE}" \
-                                                           "travis_ci_operator_self_github_deploy_key.id_rsa.enc" \
-                                                           --decrypt-to "travis_ci_operator_self_github_deploy_key.id_rsa" \
+                                                           ".travis_ci_operator_self_github_deploy_key.id_rsa.enc" \
+                                                           --decrypt-to ".travis_ci_operator_self_github_deploy_key.id_rsa" \
                                                            -p --no-interactive | grep '^openssl ') || [ -z "${SSH_DEPLOY_KEY_OPENSSL_CMD}" ] \
             && echo failed to encrypt deploy key for travis && return 1
         cp -f "${GITHUB_DEPLOY_KEY_FILE}" ~/.ssh/id_rsa && chmod 400 ~/.ssh/id_rsa
         [ "$?" != "0" ] && echo failed to setup deploy key for pushing to GitHub && return 1
-        echo Committing deploy key to repo ${GITHUB_REPO_SLUG} file travis_ci_operator_self_github_deploy_key.id_rsa.enc
+        echo Committing deploy key to repo ${GITHUB_REPO_SLUG} file .travis_ci_operator_self_github_deploy_key.id_rsa.enc
         GIT_REPO="git@github.com:${GITHUB_REPO_SLUG}.git"
         TEMPDIR=`mktemp -d`
         ! git clone --branch ${GIT_BRANCH} ${GIT_REPO} ${TEMPDIR} && echo failed to clone repo && return 1
         [ -e $TEMPDIR/.travis_ci_operator_self_github_deploy_key.id_rsa.enc ] && echo WARNING! overwriting existing .travis_ci_operator_self_github_deploy_key.id_rsa.enc
         rm -f $TEMPDIR/.travis_ci_operator_self_github_deploy_key.id_rsa.enc
-        mv travis_ci_operator_self_github_deploy_key.id_rsa.enc $TEMPDIR/.travis_ci_operator_self_github_deploy_key.id_rsa.enc
+        mv .travis_ci_operator_self_github_deploy_key.id_rsa.enc $TEMPDIR/.travis_ci_operator_self_github_deploy_key.id_rsa.enc
         pushd $TEMPDIR
         [ -e .travis-ci-operator.yaml ] && echo WARNING! overwriting existing .travis-ci-operator.yaml
         echo "selfDeployKeyDecryptCmd: '${SSH_DEPLOY_KEY_OPENSSL_CMD}'" > .travis-ci-operator.yaml
@@ -158,9 +158,7 @@ services:
 install:
 - curl -L https://raw.githubusercontent.com/OriHoch/travis-ci-operator/master/travis_ci_operator.sh > \$HOME/bin/travis_ci_operator.sh
 - bash \$HOME/bin/travis_ci_operator.sh init
-${DOCKER_INSTALL_STEP}
-script:
-- docker info | grep 'Username:'"
+${DOCKER_INSTALL_STEP}"
         echo ---
         return 0
     fi
@@ -189,21 +187,21 @@ add_deploy_key() {
         read -p 'Press <Enter> after you added the key to your repo deploy keys'
         echo Encrypting deploy key for travis
         ! prepare_push_to_github "${GITHUB_REPO_SLUG}" "${GIT_BRANCH}" && return 1
-        if [ -e "travis_ci_operator_${DEPLOY_KEY_NAME}_github_deploy_key.id_rsa.enc" ]; then
+        if [ -e ".travis_ci_operator_${DEPLOY_KEY_NAME}_github_deploy_key.id_rsa.enc" ]; then
             echo WARNING! encrypted deploy key already exists, will overwrite
-            rm "travis_ci_operator_${DEPLOY_KEY_NAME}_github_deploy_key.id_rsa.enc"
+            rm ".travis_ci_operator_${DEPLOY_KEY_NAME}_github_deploy_key.id_rsa.enc"
         fi
         ! SSH_DEPLOY_KEY_OPENSSL_CMD=$(travis encrypt-file --repo "${GITHUB_REPO_SLUG}" \
                                                            --token ${TRAVIS_TOKEN} \
                                                            "${GITHUB_DEPLOY_KEY_FILE}" \
-                                                           "travis_ci_operator_${DEPLOY_KEY_NAME}_github_deploy_key.id_rsa.enc" \
-                                                           --decrypt-to "travis_ci_operator_${DEPLOY_KEY_NAME}_github_deploy_key.id_rsa" \
+                                                           ".travis_ci_operator_${DEPLOY_KEY_NAME}_github_deploy_key.id_rsa.enc" \
+                                                           --decrypt-to ".travis_ci_operator_${DEPLOY_KEY_NAME}_github_deploy_key.id_rsa" \
                                                            -p --no-interactive | grep '^openssl ') || [ -z "${SSH_DEPLOY_KEY_OPENSSL_CMD}" ] \
             && echo failed to encrypt deploy key for travis && return 1
         SET_VALUES='{"'${DEPLOY_KEY_NAME}'DeployKeyDecryptCmd": "'${SSH_DEPLOY_KEY_OPENSSL_CMD}'"}'
         ! ~/update_yaml.py "${SET_VALUES}" \
                            .travis-ci-operator.yaml && echo failed to update .travis-ci-operator.yaml && return 1
-        git add "travis_ci_operator_${DEPLOY_KEY_NAME}_github_deploy_key.id_rsa.enc"
+        git add ".travis_ci_operator_${DEPLOY_KEY_NAME}_github_deploy_key.id_rsa.enc"
         git add .travis-ci-operator.yaml
         ! push_to_github "${GITHUB_REPO_SLUG}" "${GIT_BRANCH}" "travis-ci-operator: add deploy key ${DEPLOY_KEY_NAME}" && return 1
         echo Great Success
