@@ -1,1 +1,6 @@
-selfDeployKeyDecryptCmd: 'openssl aes-256-cbc -K $encrypted_3a25b31f1ad6_key -iv $encrypted_3a25b31f1ad6_iv -in .travis_ci_operator_self_github_deploy_key.id_rsa.enc -out .travis_ci_operator_self_github_deploy_key.id_rsa -d'
+github-yaml-updaterDeployKeyDecryptCmd: openssl aes-256-cbc -K $encrypted_fa69662db7ec_key
+  -iv $encrypted_fa69662db7ec_iv -in .travis_ci_operator_github-yaml-updater_github_deploy_key.id_rsa.enc
+  -out .travis_ci_operator_github-yaml-updater_github_deploy_key.id_rsa -d
+selfDeployKeyDecryptCmd: openssl aes-256-cbc -K $encrypted_3a25b31f1ad6_key -iv $encrypted_3a25b31f1ad6_iv
+  -in .travis_ci_operator_self_github_deploy_key.id_rsa.enc -out .travis_ci_operator_self_github_deploy_key.id_rsa
+  -d
