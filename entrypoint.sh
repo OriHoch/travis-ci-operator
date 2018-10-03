@@ -157,8 +157,8 @@ ${DOCKER_PASSWORD_SECURE_ENV}
 services:
 - docker
 install:
-- curl -L https://raw.githubusercontent.com/OriHoch/travis-ci-operator/master/travis_ci_operator.sh > /usr/local/bin/travis_ci_operator.sh
-- bash /usr/local/bin/travis_ci_operator.sh init
+- curl -L https://raw.githubusercontent.com/OriHoch/travis-ci-operator/master/travis_ci_operator.sh > \$HOME/bin/travis_ci_operator.sh
+- bash \$HOME/bin/travis_ci_operator.sh init
 ${DOCKER_INSTALL_STEP}
 script:
 - docker info | grep 'Username:'"
