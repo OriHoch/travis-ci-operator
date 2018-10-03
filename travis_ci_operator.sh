@@ -19,15 +19,23 @@ elif [ "${1}" == "github-update" ]; then
     GIT_BRANCH="${3}"
     UPDATE_SCRIPT="${4}"
     COMMIT_MSG="${5}"
+    if [ "${DEPLOY_KEY_NAME}" == "self" ]; then
+        GITHUB_REPO_SLUG="${TRAVIS_REPO_SLUG}"
+    else
+        GITHUB_REPO_SLUG="${6}"
+    fi
     [ -z "${DEPLOY_KEY_NAME}" ] || [ -z "${GIT_BRANCH}" ] || [ -z "${UPDATE_SCRIPT}" ] || [ -z "${COMMIT_MSG}" ] \
         && echo missing required arguments && exit 1
     [ "${DEPLOY_KEY_NAME}" == "self" ] && [ "${COMMIT_MSG}" == "${TRAVIS_COMMIT_MESSAGE}" ] && [ "${GIT_BRANCH}" == "${TRAVIS_BRANCH}" ] \
         && echo skipping update of self with same commit msg and branch && exit 0
-    GITHUB_REPO_SLUG="${TRAVIS_REPO_SLUG}"
     [ -z "${GITHUB_REPO_SLUG}" ] && echo missing GITHUB_REPO_SLUG && exit 1
     GITHUB_DEPLOY_KEY_FILE="travis_ci_operator_${DEPLOY_KEY_NAME}_github_deploy_key.id_rsa"
-    cp -f "${GITHUB_DEPLOY_KEY_FILE}" ~/.ssh/id_rsa && chmod 400 ~/.ssh/id_rsa
-    [ "$?" != "0" ] && echo echo failed to setup deploy key for pushing to GitHub && exit 1
+    if [ -e "${GITHUB_DEPLOY_KEY_FILE}" ]; then
+        cp -f "${GITHUB_DEPLOY_KEY_FILE}" ~/.ssh/id_rsa && chmod 400 ~/.ssh/id_rsa
+        [ "$?" != "0" ] && echo echo failed to setup deploy key for pushing to GitHub && exit 1
+    else
+        echo WARNING: deploy key file not found
+    fi
     GIT_REPO="git@github.com:${GITHUB_REPO_SLUG}.git"
     TEMPDIR=`mktemp -d`
     echo Cloning git repo ${GIT_REPO} branch ${GIT_BRANCH}
@@ -39,7 +47,8 @@ elif [ "${1}" == "github-update" ]; then
     git push ${GIT_REPO} ${GIT_BRANCH}
     [ "$?" != "0" ] && echo failed to push change to GitHub && exit 1
     popd
-    echo GitHub update complete successfully
+    rm -rf $TEMPDIR
+    echo GitHub update completed successfully
     exit 0
 
 else
