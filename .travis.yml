@@ -13,10 +13,10 @@ install:
 - travis_ci_operator.sh docker-login
 script:
 - docker build -t uumpa/travis-ci-operator:latest .
-- travis_ci_operator.sh github-update self master "echo foo > bar; git add bar" "testing github self update"
-- travis_ci_operator.sh github-update github-yaml-updater master "echo foo > bar; git add bar" "testing travis-ci-operator" OriHoch/github-yaml-updater
-- travis_ci_operator.sh github-yaml-update self master test.yaml '{"foo":"bar"}' "testing github yaml update"
-- travis_ci_operator.sh github-yaml-update github-yaml-updater master test.yaml '{"foo":"bar"}' "testing travis-ci-operator github yaml update" OriHoch/github-yaml-updater
+- travis_ci_operator.sh github-update self master "echo foo2 > bar; git add bar" "testing github self update"
+- travis_ci_operator.sh github-update github-yaml-updater master "echo foo2 > bar; git add bar" "testing travis-ci-operator" OriHoch/github-yaml-updater
+- travis_ci_operator.sh github-yaml-update self master test.yaml '{"foo2":"bar"}' "testing github yaml update"
+- travis_ci_operator.sh github-yaml-update github-yaml-updater master test.yaml '{"foo2":"bar"}' "testing travis-ci-operator github yaml update" OriHoch/github-yaml-updater
 deploy:
   provider: script
   script: docker push uumpa/travis-ci-operator:latest

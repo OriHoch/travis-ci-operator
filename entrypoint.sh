@@ -158,7 +158,20 @@ services:
 install:
 - curl -L https://raw.githubusercontent.com/OriHoch/travis-ci-operator/master/travis_ci_operator.sh > \$HOME/bin/travis_ci_operator.sh
 - bash \$HOME/bin/travis_ci_operator.sh init
-${DOCKER_INSTALL_STEP}"
+${DOCKER_INSTALL_STEP}
+script:
+- docker build -t org/image:latest .
+- travis_ci_operator.sh github-update self master \"echo foo > bar; git add bar\" \"testing github self update\"
+- travis_ci_operator.sh github-update github-yaml-updater master \"echo foo > bar; git add bar\" \"testing travis-ci-operator\" OriHoch/github-yaml-updater
+- travis_ci_operator.sh github-yaml-update self master test.yaml '{\"foo\":\"bar\"}' \"testing github yaml update\"
+- travis_ci_operator.sh github-yaml-update github-yaml-updater master test.yaml '{\"foo\":\"bar\"}' \"testing travis-ci-operator github yaml update\" OriHoch/github-yaml-updater
+deploy:
+  provider: script
+  script: docker push org/image:latest
+  on:
+    branch: master
+    condition: \$TRAVIS_TAG = \"\" && \$TRAVIS_PULL_REQUEST = \"false\"
+"
         echo ---
         return 0
     fi
