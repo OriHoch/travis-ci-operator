@@ -36,6 +36,15 @@ docker run -v /etc/travis-ci-operator:/etc/travis-ci-operator -it uumpa/travis-c
     init-docker travis_token github_user/repo branch_name docker_user docker_password
 ```
 
+## Add deploy key to allow pushing to another repo
+
+github user/repo and branch name refer to the current repo (not the repo you want to push to)
+
+```
+docker run -v /etc/travis-ci-operator:/etc/travis-ci-operator -it uumpa/travis-ci-operator \
+    add-deploy-key travis_token github_user/repo branch_name deploy_key_name
+```
+
 ## Generate travis.yml file
 
 Outputs a simple .travis.yml file with a minimal setup supporting travis-ci-operator

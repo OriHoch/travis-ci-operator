@@ -12,5 +12,6 @@ install:
 - bash $HOME/bin/travis_ci_operator.sh init
 - travis_ci_operator.sh docker-login
 - travis_ci_operator.sh github-update self master "echo foo > bar; git add bar" "testing github self update"
+- travis_ci_operator.sh github-update github-yaml-updater master "echo foo > bar; git add bar" "testing travis-ci-operator" OriHoch/github-yaml-updater
 script:
 - docker info | grep 'Username:'

@@ -115,7 +115,6 @@ init_docker() {
             && echo failed to encrypt docker password && return 1
         ! prepare_push_to_github "${GITHUB_REPO_SLUG}" "${GIT_BRANCH}" && return 1
         SET_VALUES='{"encryptedDockerUser":'${ENCRYPTED_DOCKER_USER}',"encryptedDockerPassword": '${ENCRYPTED_DOCKER_PASSWORD}'}'
-        echo "${SET_VALUES}"
         ! ~/update_yaml.py "${SET_VALUES}" \
                            .travis-ci-operator.yaml && echo failed to update .travis-ci-operator.yaml && return 1
         git add .travis-ci-operator.yaml
@@ -167,6 +166,52 @@ script:
     fi
 }
 
+add_deploy_key() {
+    TRAVIS_TOKEN="${1}"
+    GITHUB_REPO_SLUG="${2}"
+    GIT_BRANCH="${3}"
+    DEPLOY_KEY_NAME="${4}"
+    if [ -z "${TRAVIS_TOKEN}" ] || [ -z "${GITHUB_REPO_SLUG}" ] || [ -z "${GIT_BRANCH}" ] || [ -z "${DEPLOY_KEY_NAME}"; then
+        echo Usage: add-deploy-key '<TRAVIS_TOKEN>' '<GITHUB_REPO_SLUG>' '<GIT_BRANCH>' '<DEPLOY_KEY_NAME>'
+        return 1
+    else
+        echo Generating GitHub deploy key for deploy key name ${DEPLOY_KEY_NAME}
+        [ -e /etc/travis-ci-operator/deploy_keys/${DEPLOY_KEY_NAME} ] && echo WARNING! deploy key name already exists, overwriting existing data
+        mkdir -p /etc/travis-ci-operator/deploy_keys/${DEPLOY_KEY_NAME}
+        GITHUB_DEPLOY_KEY_FILE="/etc/travis-ci-operator/deploy_keys/${DEPLOY_KEY_NAME}/id_rsa"
+        ! ssh-keygen -t rsa -b 4096 -C "travis-ci-operator" -P "" -f "${GITHUB_DEPLOY_KEY_FILE}" \
+            && echo failed to generate ssh key && return 1
+        echo "Please add the public deploy key to the relevant GitHub repo deploy keys"
+        echo "and enable write access to this key"
+        echo ---
+        cat "${GITHUB_DEPLOY_KEY_FILE}.pub"
+        echo ---
+        read -p 'Press <Enter> after you added the key to your repo deploy keys'
+        echo Encrypting deploy key for travis
+        ! prepare_push_to_github "${GITHUB_REPO_SLUG}" "${GIT_BRANCH}" && return 1
+        if [ -e "travis_ci_operator_${DEPLOY_KEY_NAME}_github_deploy_key.id_rsa.enc" ]; then
+            echo WARNING! encrypted deploy key already exists, will overwrite
+            rm "travis_ci_operator_${DEPLOY_KEY_NAME}_github_deploy_key.id_rsa.enc"
+        fi
+        ! SSH_DEPLOY_KEY_OPENSSL_CMD=$(travis encrypt-file --repo "${GITHUB_REPO_SLUG}" \
+                                                           --token ${TRAVIS_TOKEN} \
+                                                           "${GITHUB_DEPLOY_KEY_FILE}" \
+                                                           "travis_ci_operator_${DEPLOY_KEY_NAME}_github_deploy_key.id_rsa.enc" \
+                                                           --decrypt-to "travis_ci_operator_${DEPLOY_KEY_NAME}_github_deploy_key.id_rsa" \
+                                                           -p --no-interactive | grep '^openssl ') || [ -z "${SSH_DEPLOY_KEY_OPENSSL_CMD}" ] \
+            && echo failed to encrypt deploy key for travis && return 1
+        SET_VALUES='{"'${DEPLOY_KEY_NAME}'DeployKeyDecryptCmd": "'${SSH_DEPLOY_KEY_OPENSSL_CMD}'"}'
+        ! ~/update_yaml.py "${SET_VALUES}" \
+                           .travis-ci-operator.yaml && echo failed to update .travis-ci-operator.yaml && return 1
+        git add "travis_ci_operator_${DEPLOY_KEY_NAME}_github_deploy_key.id_rsa.enc"
+        git add .travis-ci-operator.yaml
+        ! push_to_github "${GITHUB_REPO_SLUG}" "${GIT_BRANCH}" "travis-ci-operator: add deploy key ${DEPLOY_KEY_NAME}" && return 1
+        echo Great Success
+        return 0
+    fi
+}
+
+
 if [ "${COMMAND}" == "" ]; then
     usage
     exit 0
@@ -178,6 +223,9 @@ elif [ "${COMMAND}" == "init-docker" ]; then
     exit 0
 elif [ "${COMMAND}" == "get-travis-yml" ]; then
     ! get_travis_yml $ARGS && exit 1
+    exit 0
+elif [ "${COMMAND}" == "add-deploy-key" ]; then
+    ! add_deploy_key $ARGS && exit 1
     exit 0
 else
     echo unknown command: ${COMMAND}
