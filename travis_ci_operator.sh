@@ -67,7 +67,7 @@ elif [ "${1}" == "github-yaml-update" ]; then
     else
         GITHUB_REPO_SLUG="${7}"
     fi
-    [ -z "${DEPLOY_KEY_NAME}" ] || [ -z "${GIT_BRANCH}" ] || [ -z "${UPDATE_SCRIPT}" ] || [ -z "${COMMIT_MSG}" ] \
+    [ -z "${DEPLOY_KEY_NAME}" ] || [ -z "${GIT_BRANCH}" ] || [ -z "${YAML_FILE}" ] || [ -z "${UPDATE_VALUES}" ] || [ -z "${COMMIT_MSG}" ] \
         && echo missing required arguments && exit 1
     [ "${DEPLOY_KEY_NAME}" == "self" ] && [ "${COMMIT_MSG}" == "${TRAVIS_COMMIT_MESSAGE}" ] && [ "${GIT_BRANCH}" == "${TRAVIS_BRANCH}" ] \
         && echo skipping update of self with same commit msg and branch && exit 0
@@ -91,11 +91,12 @@ elif [ "${1}" == "github-yaml-update" ]; then
     ! update_yaml.py "${UPDATE_VALUES}" "${YAML_FILE}" \
         && echo failed to update yaml file && exit 1
     echo Committing and pushing to GitHub repo ${GIT_REPO} branch ${GIT_BRANCH}
+    git add "${YAML_FILE}"
     git commit -m "${COMMIT_MSG}" && ! git push ${GIT_REPO} ${GIT_BRANCH} \
         && echo failed to push change to GitHub && exit 1
     popd
     rm -rf $TEMPDIR
-    echo GitHub update completed successfully
+    echo GitHub yaml update completed successfully
     exit 0
 
 else

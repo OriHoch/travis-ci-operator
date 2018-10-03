@@ -8,12 +8,12 @@ env:
 services:
 - docker
 install:
-- curl -L https://raw.githubusercontent.com/OriHoch/travis-ci-operator/master/travis_ci_operator.sh > $HOME/bin/travis_ci_operator.sh
+- cp ./travis_ci_operator.sh $HOME/bin/travis_ci_operator.sh
 - bash $HOME/bin/travis_ci_operator.sh init
 - travis_ci_operator.sh docker-login
+script:
+- docker info | grep 'Username:'
 - travis_ci_operator.sh github-update self master "echo foo > bar; git add bar" "testing github self update"
 - travis_ci_operator.sh github-update github-yaml-updater master "echo foo > bar; git add bar" "testing travis-ci-operator" OriHoch/github-yaml-updater
 - travis_ci_operator.sh github-yaml-update self master test.yaml '{"foo":"bar"}' "testing github yaml update"
 - travis_ci_operator.sh github-yaml-update github-yaml-updater master test.yaml '{"foo":"bar"}' "testing travis-ci-operator github yaml update" OriHoch/github-yaml-updater
-script:
-- docker info | grep 'Username:'

@@ -169,20 +169,22 @@ add_deploy_key() {
     GITHUB_REPO_SLUG="${2}"
     GIT_BRANCH="${3}"
     DEPLOY_KEY_NAME="${4}"
-    if [ -z "${TRAVIS_TOKEN}" ] || [ -z "${GITHUB_REPO_SLUG}" ] || [ -z "${GIT_BRANCH}" ] || [ -z "${DEPLOY_KEY_NAME}"; then
+    if [ -z "${TRAVIS_TOKEN}" ] || [ -z "${GITHUB_REPO_SLUG}" ] || [ -z "${GIT_BRANCH}" ] || [ -z "${DEPLOY_KEY_NAME}" ]; then
         echo Usage: add-deploy-key '<TRAVIS_TOKEN>' '<GITHUB_REPO_SLUG>' '<GIT_BRANCH>' '<DEPLOY_KEY_NAME>'
         return 1
     else
         echo Generating GitHub deploy key for deploy key name ${DEPLOY_KEY_NAME}
-        [ -e /etc/travis-ci-operator/deploy_keys/${DEPLOY_KEY_NAME} ] && echo WARNING! deploy key name already exists, overwriting existing data
+        [ -e /etc/travis-ci-operator/deploy_keys/${DEPLOY_KEY_NAME} ] \
+            && echo WARNING! deploy key name already exists, overwriting existing data \
+            && rm -rf /etc/travis-ci-operator/deploy_keys/${DEPLOY_KEY_NAME}
         mkdir -p /etc/travis-ci-operator/deploy_keys/${DEPLOY_KEY_NAME}
-        GITHUB_DEPLOY_KEY_FILE="/etc/travis-ci-operator/deploy_keys/${DEPLOY_KEY_NAME}/id_rsa"
-        ! ssh-keygen -t rsa -b 4096 -C "travis-ci-operator" -P "" -f "${GITHUB_DEPLOY_KEY_FILE}" \
+        OTHER_DEPLOY_KEY_FILE="/etc/travis-ci-operator/deploy_keys/${DEPLOY_KEY_NAME}/id_rsa"
+        ! ssh-keygen -t rsa -b 4096 -C "travis-ci-operator" -P "" -f "${OTHER_DEPLOY_KEY_FILE}" \
             && echo failed to generate ssh key && return 1
         echo "Please add the public deploy key to the relevant GitHub repo deploy keys"
         echo "and enable write access to this key"
         echo ---
-        cat "${GITHUB_DEPLOY_KEY_FILE}.pub"
+        cat "${OTHER_DEPLOY_KEY_FILE}.pub"
         echo ---
         read -p 'Press <Enter> after you added the key to your repo deploy keys'
         echo Encrypting deploy key for travis
@@ -193,7 +195,7 @@ add_deploy_key() {
         fi
         ! SSH_DEPLOY_KEY_OPENSSL_CMD=$(travis encrypt-file --repo "${GITHUB_REPO_SLUG}" \
                                                            --token ${TRAVIS_TOKEN} \
-                                                           "${GITHUB_DEPLOY_KEY_FILE}" \
+                                                           "${OTHER_DEPLOY_KEY_FILE}" \
                                                            ".travis_ci_operator_${DEPLOY_KEY_NAME}_github_deploy_key.id_rsa.enc" \
                                                            --decrypt-to ".travis_ci_operator_${DEPLOY_KEY_NAME}_github_deploy_key.id_rsa" \
                                                            -p --no-interactive | grep '^openssl ') || [ -z "${SSH_DEPLOY_KEY_OPENSSL_CMD}" ] \
