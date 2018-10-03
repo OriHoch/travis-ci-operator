@@ -14,6 +14,34 @@ elif [ "${1}" == "docker-login" ]; then
     echo Logged in to Docker
     exit 0
 
+elif [ "${1}" == "github-update" ]; then
+    DEPLOY_KEY_NAME="${1}"
+    GIT_BRANCH="${2}"
+    UPDATE_SCRIPT="${3}"
+    COMMIT_MSG="${4}"
+    [ -z "${DEPLOY_KEY_NAME}" ] || [ -z "${GIT_BRANCH}" ] || [ -z "${UPDATE_SCRIPT}" ] || [ -z "${COMMIT_MSG}" ] \
+        && echo missing required arguments && exit 1
+    [ "${DEPLOY_KEY_NAME}" == "self" ] && [ "${COMMIT_MSG}" == "${TRAVIS_COMMIT_MESSAGE}" ] && [ "${GIT_BRANCH}" == "${TRAVIS_BRANCH}" ] \
+        && echo skipping update of self with same commit msg and branch && exit 0
+    GITHUB_REPO_SLUG="${TRAVIS_REPO_SLUG}"
+    [ -z "${GITHUB_REPO_SLUG}" ] && echo missing GITHUB_REPO_SLUG && exit 1
+    GITHUB_DEPLOY_KEY_FILE="travis_ci_operator_self_github_deploy_key.id_rsa"
+    cp -f "${GITHUB_DEPLOY_KEY_FILE}" ~/.ssh/id_rsa && chmod 400 ~/.ssh/id_rsa
+    [ "$?" != "0" ] && echo echo failed to setup deploy key for pushing to GitHub && return 1
+    GIT_REPO="git@github.com:${GITHUB_REPO_SLUG}.git"
+    TEMPDIR=`mktemp -d`
+    echo Cloning git repo ${GIT_REPO}
+    ! git clone --branch ${GIT_BRANCH} ${GIT_REPO} ${TEMPDIR} && echo failed to clone repo && return 1
+    pushd $TEMPDIR
+    eval "${UPDATE_SCRIPT}"
+    echo Committing and pushing to GitHub repo ${GIT_REPO} branch ${GIT_BRANCH}
+    git commit -m "${COMMIT_MSG}" &&\
+    git push ${GIT_REPO} ${GIT_BRANCH}
+    [ "$?" != "0" ] && echo failed to push change to GitHub && exit 1
+    popd
+    echo GitHub update complete successfully
+    exit 0
+
 else
     echo unknown command
     exit 1
