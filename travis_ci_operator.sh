@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 
 if [ "${1}" == "init" ]; then
-    chmod +x travis_ci_operator.sh
-    curl -L https://raw.githubusercontent.com/OriHoch/travis-ci-operator/master/read_yaml.py > read_yaml.py
-    chmod +x ./read_yaml.py
+    chmod +x /usr/local/bin/travis_ci_operator.sh
+    curl -L https://raw.githubusercontent.com/OriHoch/travis-ci-operator/master/read_yaml.py > /usr/local/bin/read_yaml.py
+    chmod +x /usr/local/bin/read_yaml.py
     ! $(eval echo `./read_yaml.py .travis-ci-operator.yaml selfDeployKeyDecryptCmd`) \
         && echo Failed to get self deploy key && exit 1
     echo Successfully initialized travis-ci-operator

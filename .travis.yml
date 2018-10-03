@@ -8,8 +8,8 @@ env:
 services:
 - docker
 install:
-- curl -L https://raw.githubusercontent.com/OriHoch/travis-ci-operator/master/travis_ci_operator.sh > travis_ci_operator.sh
-- bash travis_ci_operator.sh init
-- ./travis_ci_operator.sh docker_login
+- curl -L https://raw.githubusercontent.com/OriHoch/travis-ci-operator/master/travis_ci_operator.sh > /usr/local/bin/travis_ci_operator.sh
+- bash /usr/local/bin/travis_ci_operator.sh init
+- travis_ci_operator.sh docker_login
 script:
 - docker info | grep 'Username:'

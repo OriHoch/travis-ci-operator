@@ -137,7 +137,7 @@ get_travis_yml() {
         ENCRYPTED_DOCKER_USER=`~/read_yaml.py .travis-ci-operator.yaml encryptedDockerUser`
         ENCRYPTED_DOCKER_PASSWORD=`~/read_yaml.py .travis-ci-operator.yaml encryptedDockerPassword`
         if ! [ -z "${ENCRYPTED_DOCKER_USER}" ] && ! [ -z "${ENCRYPTED_DOCKER_PASSWORD}" ]; then
-            DOCKER_INSTALL_STEP="- ./travis_ci_operator.sh docker_login"
+            DOCKER_INSTALL_STEP="- travis_ci_operator.sh docker_login"
             DOCKER_USER_SECURE_ENV='  - secure: '${ENCRYPTED_DOCKER_USER}
             DOCKER_PASSWORD_SECURE_ENV='  - secure: '${ENCRYPTED_DOCKER_PASSWORD}
         else
@@ -157,8 +157,8 @@ ${DOCKER_PASSWORD_SECURE_ENV}
 services:
 - docker
 install:
-- curl -L https://raw.githubusercontent.com/OriHoch/travis-ci-operator/master/travis_ci_operator.sh > travis_ci_operator.sh
-- bash travis_ci_operator.sh init
+- curl -L https://raw.githubusercontent.com/OriHoch/travis-ci-operator/master/travis_ci_operator.sh > /usr/local/bin/travis_ci_operator.sh
+- bash /usr/local/bin/travis_ci_operator.sh init
 ${DOCKER_INSTALL_STEP}
 script:
 - docker info | grep 'Username:'"
