@@ -6,6 +6,7 @@ if [ "${1}" == "init" ]; then
     chmod +x $HOME/bin/read_yaml.py
     curl -L https://raw.githubusercontent.com/OriHoch/travis-ci-operator/master/update_yaml.py > $HOME/bin/update_yaml.py
     chmod +x $HOME/bin/update_yaml.py
+    if [ -e .travis.banner ]; then cat .travis.banner; else curl -L https://raw.githubusercontent.com/OriHoch/travis-ci-operator/master/.travis.banner; fi
     ! $(eval echo `read_yaml.py .travis-ci-operator.yaml selfDeployKeyDecryptCmd`) \
         && echo Failed to get self deploy key && exit 1
     echo Successfully initialized travis-ci-operator

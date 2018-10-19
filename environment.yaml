@@ -1,0 +1,15 @@
+# Create a conda environment using this file by running:
+# conda env create -f environment.yaml
+name: travis-ci-operator
+channels:
+  - defaults
+dependencies:
+  - ipython>=7.0.1
+  - jupyter>=1.0.0
+  - jupyterlab>=0.35.0
+  - leveldb>=1.20
+  - python>=3.7.0
+  - pip:
+    - dataflows>=0.0.23
+    - datapackage>=1.5.0
+    - tabulator>=1.17.0
