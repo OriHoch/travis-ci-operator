@@ -38,14 +38,12 @@ elif [ "${1}" == "github-update" ]; then
     [ "${DEPLOY_KEY_NAME}" == "self" ] && [ "${COMMIT_MSG}" == "${TRAVIS_COMMIT_MESSAGE}" ] && [ "${GIT_BRANCH}" == "${TRAVIS_BRANCH}" ] \
         && echo skipping update of self with same commit msg and branch && exit 0
     [ -z "${GITHUB_REPO_SLUG}" ] && echo missing GITHUB_REPO_SLUG && exit 1
-    if [ "${DEPLOY_KEY_NAME}" != "self" ]; then
-        ! $(eval echo `read_yaml.py .travis-ci-operator.yaml ${DEPLOY_KEY_NAME}DeployKeyDecryptCmd`) \
-            && echo Failed to get deploy key && exit 1
-    fi
+    ! $(eval echo `read_yaml.py .travis-ci-operator.yaml ${DEPLOY_KEY_NAME}DeployKeyDecryptCmd`) \
+        && echo Failed to get deploy key && exit 1
     GITHUB_DEPLOY_KEY_FILE=".travis_ci_operator_${DEPLOY_KEY_NAME}_github_deploy_key.id_rsa"
     if [ -e "${GITHUB_DEPLOY_KEY_FILE}" ]; then
         cp -f "${GITHUB_DEPLOY_KEY_FILE}" ~/.ssh/id_rsa && chmod 400 ~/.ssh/id_rsa
-        [ "$?" != "0" ] && echo echo failed to setup deploy key for pushing to GitHub && exit 1
+        [ "$?" != "0" ] && echo failed to setup deploy key for pushing to GitHub && exit 1
     else
         echo WARNING: deploy key file not found
     fi
@@ -79,10 +77,8 @@ elif [ "${1}" == "github-yaml-update" ]; then
     [ "${DEPLOY_KEY_NAME}" == "self" ] && [ "${COMMIT_MSG}" == "${TRAVIS_COMMIT_MESSAGE}" ] && [ "${GIT_BRANCH}" == "${TRAVIS_BRANCH}" ] \
         && echo skipping update of self with same commit msg and branch && exit 0
     [ -z "${GITHUB_REPO_SLUG}" ] && echo missing GITHUB_REPO_SLUG && exit 1
-    if [ "${DEPLOY_KEY_NAME}" != "self" ]; then
-        ! $(eval echo `read_yaml.py .travis-ci-operator.yaml ${DEPLOY_KEY_NAME}DeployKeyDecryptCmd`) \
-            && echo Failed to get deploy key && exit 1
-    fi
+    ! $(eval echo `read_yaml.py .travis-ci-operator.yaml ${DEPLOY_KEY_NAME}DeployKeyDecryptCmd`) \
+        && echo Failed to get deploy key && exit 1
     GITHUB_DEPLOY_KEY_FILE=".travis_ci_operator_${DEPLOY_KEY_NAME}_github_deploy_key.id_rsa"
     if [ -e "${GITHUB_DEPLOY_KEY_FILE}" ]; then
         cp -f "${GITHUB_DEPLOY_KEY_FILE}" ~/.ssh/id_rsa && chmod 400 ~/.ssh/id_rsa
