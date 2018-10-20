@@ -1,21 +1,27 @@
 #!/usr/bin/env bash
 
-if [ "${1}" == "init" ]; then
+_install_travis_ci_operator() {
     chmod +x $HOME/bin/travis_ci_operator.sh
-    curl -L https://raw.githubusercontent.com/OriHoch/travis-ci-operator/master/read_yaml.py > $HOME/bin/read_yaml.py
-    chmod +x $HOME/bin/read_yaml.py
-    curl -L https://raw.githubusercontent.com/OriHoch/travis-ci-operator/master/update_yaml.py > $HOME/bin/update_yaml.py
-    chmod +x $HOME/bin/update_yaml.py
-    if [ -e .travis.banner ]; then cat .travis.banner; else curl -L https://raw.githubusercontent.com/OriHoch/travis-ci-operator/master/.travis.banner; fi
-    ! $(eval echo `read_yaml.py .travis-ci-operator.yaml selfDeployKeyDecryptCmd`) \
-        && echo Failed to get self deploy key && exit 1
-    echo Successfully initialized travis-ci-operator
-    exit 0
+}
+
+_install_script() {
+    if [ -e "${1}" ]; then cp "${1}" "${HOME}/bin/${1}"
+    else curl -L "https://raw.githubusercontent.com/OriHoch/travis-ci-operator/master/${1}" > "${HOME}/bin/${1}"
+    fi && chmod +x "${HOME}/bin/${1}"
+}
+
+if [ "${1}" == "init" ]; then
+    _install_travis_ci_operator &&\
+    _install_script read_yaml.py &&\
+    _install_script update_yaml.py &&\
+    if [ -e .travis.banner ]; then cat .travis.banner; else curl -L https://raw.githubusercontent.com/OriHoch/travis-ci-operator/master/.travis.banner; fi &&\
+    echo Successfully initialized travis-ci-operator && exit 0
+    echo Failed to initialize travis-ci-operator && exit 1
 
 elif [ "${1}" == "docker-login" ]; then
-    ! docker login -u "${DOCKER_USER}" -p "${DOCKER_PASSWORD}" && echo failed to login to Docker && exit 1
-    echo Logged in to Docker
-    exit 0
+    docker login -u "${DOCKER_USER}" -p "${DOCKER_PASSWORD}" &&\
+    echo Logged in to Docker && exit 0
+    echo failed to login to Docker && exit 1
 
 elif [ "${1}" == "github-update" ]; then
     DEPLOY_KEY_NAME="${2}"
