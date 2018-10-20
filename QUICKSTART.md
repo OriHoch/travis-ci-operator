@@ -134,10 +134,6 @@ echo docker run -v /etc/travis-ci-operator:/etc/travis-ci-operator \
 
 Outputs an basic .travis.yml file which you can modify and extend
 
-#### Modify travis.yml for common use-cases
-
-Add a `.travis.sh` script to the repo:
-
 
 ```bash
 DOCKER_IMAGE="uumpa/hasadna-migdar-internal-search-ui"
