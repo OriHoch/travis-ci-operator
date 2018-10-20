@@ -14,6 +14,8 @@ elif [ "${1}" == "script" ]; then
     travis_ci_operator.sh github-update github-yaml-updater master "echo foo2 > bar; git add bar" "testing travis-ci-operator" OriHoch/github-yaml-updater &&\
     travis_ci_operator.sh github-yaml-update self master test.yaml '{"foo2":"bar"}' "testing github yaml update" &&\
     travis_ci_operator.sh github-yaml-update github-yaml-updater master test.yaml '{"foo2":"bar"}' "testing travis-ci-operator github yaml update" OriHoch/github-yaml-updater &&\
+    travis_ci_operator.sh github-update self master "git rm bar test.yaml" "testing github self update" &&\
+    travis_ci_operator.sh github-update github-yaml-updater master "git rm bar test.yaml" "testing travis-ci-operator" OriHoch/github-yaml-updater &&\
     exit 0
 
 elif [ "${1}" == "deploy" ]; then

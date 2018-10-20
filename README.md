@@ -1,6 +1,27 @@
 # Travis CI Operator
 
-Automate setup and usage of Travis CI in combination with Docker and GitHub
+[![Build Status](https://travis-ci.org/OriHoch/travis-ci-operator.svg?branch=master)](https://travis-ci.org/OriHoch/travis-ci-operator)
+
+```
+      _____                         _____
+      __  /_______________ ____   _____(_)________
+      _  __/__  ___/_  __ `/__ | / /__  / __  ___/
+      / /_  _  /    / /_/ / __ |/ / _  /  _(__  )
+      \__/  /_/     \__,_/  _____/  /_/   /____/
+                             _____
+                      __________(_)
+                      _  ___/__  /
+                      / /__  _  /
+                      \___/  /_/
+                                       _____
+ ______ ________ _____ ______________ ___  /_______ ________
+ _  __ \___  __ \_  _ \__  ___/_  __ `/_  __/_  __ \__  ___/
+ / /_/ /__  /_/ //  __/_  /    / /_/ / / /_  / /_/ /_  /
+ \____/ _  .___/ \___/ /_/     \__,_/  \__/  \____/ /_/
+        /_/
+```
+
+Automate setup and usage of Travis CI for open source projects
 
 ## Quickstart
 
@@ -10,6 +31,8 @@ Follow the quickstart guide to get start quickly:
 
 
 ## Additional Documentation
+
+Documentation of additional features / use-cases not included in the quickstart
 
 ### Updating yaml files in GitHub repos
 
