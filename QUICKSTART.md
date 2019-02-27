@@ -55,7 +55,7 @@ export GITHUB_USER="hasadna"
 export GITHUB_REPO="migdar-search-ui"
 export BRANCH_NAME="master"
 
-echo This step needs to run interactively outside of the Jupyter noteboo
+echo This step needs to run interactively outside of the Jupyter notebooks
 echo
 echo run the following in a new terminal to initialize ${GITHUB_USER}/${GITHUB_REPO}:
 echo
@@ -64,9 +64,9 @@ echo docker run -v /etc/travis-ci-operator:/etc/travis-ci-operator \
 ```
 
     This step needs to run interactively outside of the Jupyter noteboo
-    
+
     run the following in a new terminal to initialize hasadna/migdar-search-ui:
-    
+
     docker run -v /etc/travis-ci-operator:/etc/travis-ci-operator -it uumpa/travis-ci-operator init `travis token` hasadna/migdar-search-ui master
 
 
@@ -124,9 +124,9 @@ echo docker run -v /etc/travis-ci-operator:/etc/travis-ci-operator \
 ```
 
     This step needs to run interactively outside of the Jupyter noteboo
-    
+
     run the following in a new terminal to add deploy key migdar-k8s:
-    
+
     docker run -v /etc/travis-ci-operator:/etc/travis-ci-operator -it uumpa/travis-ci-operator add-deploy-key `travis token` hasadna/migdar-search-ui master migdar-k8s
 
 
@@ -177,10 +177,10 @@ fi; exit 1
 '
 ```
 
-    
+
     Create the following files in the root of the hasadna/migdar-search-ui repo, master branch:
-    
-    
+
+
     Cloning git repo git@github.com:hasadna/migdar-search-ui.git
     Cloning into '/tmp/tmp.ilKoHO'...
     Warning: Permanently added the RSA host key for IP address '192.30.253.112' to the list of known hosts.
@@ -214,7 +214,7 @@ fi; exit 1
     - travis_ci_operator.sh docker-login
     ---
     Create the above .travis.yml and append the following lines:
-    
+
     script:
     - chmod +x .travis.sh && ./.travis.sh script
     deploy:
@@ -223,22 +223,22 @@ fi; exit 1
       on:
         tags: false
         condition: "$TRAVIS_BRANCH = master
-    
-    
-    
+
+
+
     -- .travis.sh:
-    
-    
+
+
     #!/usr/bin/env bash
-    
+
     DOCKER_IMAGE=uumpa/hasadna-migdar-internal-search-ui
-    
+
     [ -e .travis.banner ] && cat .travis.banner
-    
+
     if [ "${1}" == "script" ]; then
         docker build -t ${DOCKER_IMAGE}:latest -t ${DOCKER_IMAGE}:${TRAVIS_COMMIT} && exit 0
     elif [ "${1}" == "deploy" ]; then
         docker push ${DOCKER_IMAGE}:latest && docker push ${DOCKER_IMAGE}:${TRAVIS_COMMIT} && exit 0
     fi; exit 1
-    
+
 
