@@ -56,7 +56,7 @@ init() {
         echo ---
         read -p 'Press <Enter> after you added the key to your repo deploy keys'
         echo Enabling Travis for slug ${GITHUB_REPO_SLUG}
-        while ! travis enable --token ${TRAVIS_TOKEN} --repo "${GITHUB_REPO_SLUG}" --no-interactive; do
+        while ! travis enable --token ${TRAVIS_TOKEN} --repo "${GITHUB_REPO_SLUG}" --no-interactive --org; do
             sleep 1
             echo .
         done
@@ -66,7 +66,7 @@ init() {
                                                            "${GITHUB_DEPLOY_KEY_FILE}" \
                                                            ".travis_ci_operator_self_github_deploy_key.id_rsa.enc" \
                                                            --decrypt-to ".travis_ci_operator_self_github_deploy_key.id_rsa" \
-                                                           -p --no-interactive | grep '^openssl ') || [ -z "${SSH_DEPLOY_KEY_OPENSSL_CMD}" ] \
+                                                           -p --no-interactive --org | grep '^openssl ') || [ -z "${SSH_DEPLOY_KEY_OPENSSL_CMD}" ] \
             && echo failed to encrypt deploy key for travis && return 1
         cp -f "${GITHUB_DEPLOY_KEY_FILE}" ~/.ssh/id_rsa && chmod 400 ~/.ssh/id_rsa
         [ "$?" != "0" ] && echo failed to setup deploy key for pushing to GitHub && return 1
@@ -106,12 +106,12 @@ init_docker() {
         ! ENCRYPTED_DOCKER_USER=$(travis encrypt --token ${TRAVIS_TOKEN} \
                                                  --repo "${GITHUB_REPO_SLUG}" \
                                                  "DOCKER_USER=${DOCKER_USER}" \
-                                                 --no-interactive) || [ -z "${ENCRYPTED_DOCKER_USER}" ] \
+                                                 --no-interactive --org) || [ -z "${ENCRYPTED_DOCKER_USER}" ] \
             && echo failed to encrypt docker user && return 1
         ! ENCRYPTED_DOCKER_PASSWORD=$(travis encrypt --token ${TRAVIS_TOKEN} \
                                                      --repo "${GITHUB_REPO_SLUG}" \
                                                      "DOCKER_PASSWORD=${DOCKER_PASSWORD}" \
-                                                     --no-interactive) || [ -z "${ENCRYPTED_DOCKER_PASSWORD}" ] \
+                                                     --no-interactive --org) || [ -z "${ENCRYPTED_DOCKER_PASSWORD}" ] \
             && echo failed to encrypt docker password && return 1
         ! prepare_push_to_github "${GITHUB_REPO_SLUG}" "${GIT_BRANCH}" && return 1
         SET_VALUES='{"encryptedDockerUser":'${ENCRYPTED_DOCKER_USER}',"encryptedDockerPassword": '${ENCRYPTED_DOCKER_PASSWORD}'}'
@@ -211,7 +211,7 @@ add_deploy_key() {
                                                            "${OTHER_DEPLOY_KEY_FILE}" \
                                                            ".travis_ci_operator_${DEPLOY_KEY_NAME}_github_deploy_key.id_rsa.enc" \
                                                            --decrypt-to ".travis_ci_operator_${DEPLOY_KEY_NAME}_github_deploy_key.id_rsa" \
-                                                           -p --no-interactive | grep '^openssl ') || [ -z "${SSH_DEPLOY_KEY_OPENSSL_CMD}" ] \
+                                                           -p --no-interactive --org | grep '^openssl ') || [ -z "${SSH_DEPLOY_KEY_OPENSSL_CMD}" ] \
             && echo failed to encrypt deploy key for travis && return 1
         SET_VALUES='{"'${DEPLOY_KEY_NAME}'DeployKeyDecryptCmd": "'${SSH_DEPLOY_KEY_OPENSSL_CMD}'"}'
         ! ~/update_yaml.py "${SET_VALUES}" \
